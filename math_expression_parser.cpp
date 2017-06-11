@@ -1,7 +1,7 @@
 // math_expression_parser.cpp: определяет точку входа для консольного приложения.
 //
 
-#include "stdafx.h"
+//#include "stdafx.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -65,6 +65,23 @@ void split(string expression_str, vector<Lexem> &expression)
 			}
 			expression.push_back(*newLexem);
 			break;
+		case ' ':
+			continue;
+		case '(':
+		case ')':
+			if (digits_buffer.length() > 0)
+			{
+				newLexem = new Lexem;
+				newLexem->field_type = lexem_type::num;
+				newLexem->val.number = atoi(digits_buffer.c_str());
+				digits_buffer = "";
+				expression.push_back(*newLexem);
+			}
+			newLexem = new Lexem;
+			newLexem->field_type = bracket;
+			newLexem->val.oper.val = expression_str[i];
+			expression.push_back(*newLexem);
+			break;
 		default:
 			digits_buffer += expression_str[i];
 			break;
@@ -101,7 +118,7 @@ void convert_to_postfix(vector<Lexem> &expression, vector<Lexem> &result)
 		{
 			if (expression[i].val.oper.val == '(')
 			{
-				result.push_back(expression[i]);
+				tmp.push(expression[i]);
 			}
 			else // if token is )
 			{
@@ -127,27 +144,32 @@ void print_expression(vector<Lexem> &expression)
 	{
 		if ((expression[i].field_type == lexem_type::oper) || (expression[i].field_type == lexem_type::bracket))
 		{
-			cout << expression[i].val.oper.val;
+			cout << expression[i].val.oper.val<<" ";
 		}
 		else
 		{
-			cout << expression[i].val.number;
+			cout << expression[i].val.number<<" ";
 		}
 	}
 	cout << endl;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+	if (argc != 2)
+	{
+		printf("Error!\n");
+		return 1;
+	}
 	vector<Lexem> expression;
-	string exp = "2+2*2^2";
+	string exp = argv[1];//"(1+2)*(3+4)";
 	split(exp, expression);
 	print_expression(expression);
 	cout <<"Postfix form" << endl;
 	vector<Lexem> postfix;
 	convert_to_postfix(expression, postfix);
 	print_expression(postfix);
-	system("pause");
+	//system("pause");
     return 0;
 }
 
